@@ -7,8 +7,11 @@ def calculate_risk_score(results):
         if r["status"] == "SLIGHTLY_ABNORMAL":
             score -= 5
 
-        if r["status"] == "CRITICAL":
-            score -= 15
+        elif r["status"] == "HIGH":
+            score -= 10
+
+        elif r["status"] == "CRITICAL":
+            score -= 20
 
     if score < 0:
         score = 0

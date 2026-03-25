@@ -21,10 +21,18 @@ medicine_list = medicine_db["base_name"].dropna().unique().tolist()
 from sentence_transformers import SentenceTransformer, util
 import torch
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Lazy loading - model will be loaded when first used
+model = None
+medicine_embeddings = None
 
-# Precompute embeddings for medicines
-medicine_embeddings = model.encode(medicine_list, convert_to_tensor=True)
+def get_model():
+    global model, medicine_embeddings
+    if model is None:
+        print("Loading medicine detection model...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        medicine_embeddings = model.encode(medicine_list, convert_to_tensor=True)
+        print("Medicine detection model loaded!")
+    return model, medicine_embeddings
 # -----------------------------
 # OCR PRESCRIPTION READER
 # -----------------------------
@@ -74,15 +82,19 @@ def detect_medicines(text):
             if score > 90:
                 detected.append(med)
 
-        # semantic similarity
-        word_embedding = model.encode(word, convert_to_tensor=True)
+    # Only load model if we have potential medicines to check
+    if words:
+        model, medicine_embeddings = get_model()
 
-        similarities = util.cos_sim(word_embedding, medicine_embeddings)[0]
+        for word in words:
+            word_embedding = model.encode(word, convert_to_tensor=True)
 
-        best_idx = torch.argmax(similarities)
+            similarities = util.cos_sim(word_embedding, medicine_embeddings)[0]
 
-        if similarities[best_idx] > 0.80:
-            detected.append(medicine_list[best_idx])
+            best_idx = torch.argmax(similarities)
+
+            if similarities[best_idx] > 0.80:
+                detected.append(medicine_list[best_idx])
 
     return list(set(detected))
 # -----------------------------

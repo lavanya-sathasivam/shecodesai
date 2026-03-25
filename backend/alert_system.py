@@ -18,11 +18,7 @@ def check_critical_alerts(abnormal_results):
 
             message = f"🚨 CRITICAL ALERT: {test} is dangerously abnormal (value: {value}). Please consult a doctor immediately."
 
-            alerts.append({
-                "test": test,
-                "value": value,
-                "alert": message
-            })
+            alerts.append(message)
 
     return alerts
 

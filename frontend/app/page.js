@@ -92,7 +92,13 @@ alert("Please analyze a lab report first")
 return
 }
 
-const text = `Lab Report Summary: ${labResult.summary}. Abnormalities: ${labResult.abnormalities.map(a=>`${a.test}: ${a.value}`).join(', ')}. Risk Score: ${labResult.risk_score}`
+const abnormalitiesText = labResult.abnormalities && labResult.abnormalities.length > 0
+? labResult.abnormalities.map(a=>`${a.test}: ${a.value}`).join(', ')
+: "No abnormalities detected"
+
+const riskScoreText = labResult.risk_score ? `${labResult.risk_score.score} (${labResult.risk_score.status})` : "Calculating"
+
+const text = `Lab Report Summary: ${labResult.summary || "Analysis in progress"}. Abnormalities: ${abnormalitiesText}. Risk Score: ${riskScoreText}`
 
 const res=await fetch(`${backend}/build_report_context`,{
 method:"POST",
@@ -196,33 +202,37 @@ borderRadius:"10px",
 fontSize:"22px",
 fontWeight:"bold"
 }}>
-{labResult.risk_score}
+{labResult.risk_score ? `${labResult.risk_score.score} - ${labResult.risk_score.status}` : "Calculating..."}
 </div>
 
 <h3 style={{marginTop:"20px"}}>Medical Summary</h3>
 
-<p>{labResult.summary}</p>
+<p>{labResult.summary || "Analysis in progress..."}</p>
 
 <h3>Critical Alerts</h3>
 
 <ul>
-
-{labResult.alerts.map((a,i)=>(
-<li key={i}>{a}</li>
-))}
-
+{labResult.alerts && labResult.alerts.length > 0 ? (
+  labResult.alerts.map((a,i)=>(
+    <li key={i}>{a}</li>
+  ))
+) : (
+  <li>No critical alerts detected.</li>
+)}
 </ul>
 
 <h3>Possible Conditions</h3>
 
 <ul>
-
-{labResult.possible_conditions.map((d,i)=>(
-<li key={i}>{d}</li>
-))}
-
+{labResult.possible_conditions && labResult.possible_conditions.length > 0 ? (
+  labResult.possible_conditions.map((d,i)=>(
+    <li key={i}>{d}</li>
+  ))
+) : (
+  <li>No conditions detected.</li>
+)}
 </ul>
-{labResult.abnormalities.length === 0 && (
+{labResult.abnormalities && labResult.abnormalities.length === 0 && (
 <p>No abnormalities detected in the report.</p>
 )}
 {chartData &&(
@@ -282,21 +292,25 @@ Analyze Prescription
 <h3>Detected Medicines</h3>
 
 <ul>
-
-{prescriptionResult.medicines.map((m,i)=>(
-<li key={i}>{m}</li>
-))}
-
+{prescriptionResult.medicines && prescriptionResult.medicines.length > 0 ? (
+  prescriptionResult.medicines.map((m,i)=>(
+    <li key={i}>{m}</li>
+  ))
+) : (
+  <li>No medicines detected.</li>
+)}
 </ul>
 
 <h3>Drug Interaction Warnings</h3>
 
 <ul>
-
-{prescriptionResult.interaction_warnings.map((w,i)=>(
-<li key={i}>{w}</li>
-))}
-
+{prescriptionResult.interaction_warnings && prescriptionResult.interaction_warnings.length > 0 ? (
+  prescriptionResult.interaction_warnings.map((w,i)=>(
+    <li key={i}>{w}</li>
+  ))
+) : (
+  <li>No interaction warnings.</li>
+)}
 </ul>
 
 </div>

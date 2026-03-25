@@ -3,20 +3,26 @@ import faiss
 import numpy as np
 import pandas as pd
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Lazy loading
+model = None
+knowledge_docs = None
 
-documents = []
-
-# load dataset
-knowledge_df = pd.read_csv("dataset/medical_knowledge_base.csv")
-
-# use correct column
-knowledge_docs = knowledge_df["name"].tolist()
+def get_model_and_knowledge():
+    global model, knowledge_docs
+    if model is None:
+        print("Loading AI copilot model...")
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        # load dataset
+        knowledge_df = pd.read_csv("dataset/medical_knowledge_base.csv")
+        # use correct column
+        knowledge_docs = knowledge_df["name"].tolist()
+        print("AI copilot model loaded!")
+    return model, knowledge_docs
 
 
 def build_vector_store(text):
 
-    global documents
+    model, knowledge_docs = get_model_and_knowledge()
 
     report_docs = text.split("\n")
 
@@ -34,6 +40,8 @@ def build_vector_store(text):
 
 
 def query_copilot(question, index, documents):
+
+    model, _ = get_model_and_knowledge()
 
     q_embedding = model.encode([question])
 

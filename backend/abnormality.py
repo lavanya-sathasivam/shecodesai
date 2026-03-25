@@ -17,6 +17,7 @@ def detect_abnormal(values):
         if row.empty:
             continue
 
+        # Use the first matching range (in case of duplicates)
         low = float(row.iloc[0]["low"])
         high = float(row.iloc[0]["high"])
 
@@ -25,13 +26,25 @@ def detect_abnormal(values):
         except:
             continue
 
-        status = "NORMAL"
-
+        # Calculate deviation percentage
         if value < low:
-            status = "LOW"
-
+            deviation = (low - value) / low * 100
+            if deviation > 30:  # More than 30% below normal
+                status = "CRITICAL"
+            elif deviation > 15:  # 15-30% below normal
+                status = "HIGH"
+            else:
+                status = "SLIGHTLY_ABNORMAL"
         elif value > high:
-            status = "HIGH"
+            deviation = (value - high) / high * 100
+            if deviation > 30:  # More than 30% above normal
+                status = "CRITICAL"
+            elif deviation > 15:  # 15-30% above normal
+                status = "HIGH"
+            else:
+                status = "SLIGHTLY_ABNORMAL"
+        else:
+            status = "NORMAL"
 
         results.append({
             "test": test,

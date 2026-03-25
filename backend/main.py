@@ -44,14 +44,36 @@ def predict_disease(values):
 
     diseases = []
 
-    if values.get("Hemoglobin", 20) < 12:
-        diseases.append("Possible Anemia")
+    # Anemia detection - more comprehensive
+    hemoglobin = values.get("Hemoglobin")
+    if hemoglobin is not None and hemoglobin < 12.0:
+        if hemoglobin < 8.0:
+            diseases.append("Severe Anemia")
+        elif hemoglobin < 10.0:
+            diseases.append("Moderate Anemia")
+        else:
+            diseases.append("Mild Anemia")
 
-    if values.get("White_Blood_Cells", 0) > 11000:
-        diseases.append("Possible Infection")
+    # Infection detection - more nuanced
+    wbc = values.get("White_Blood_Cells")
+    if wbc is not None:
+        if wbc > 15000:
+            diseases.append("Severe Infection")
+        elif wbc > 12000:
+            diseases.append("Possible Infection")
 
-    if values.get("Glucose", 0) > 125:
-        diseases.append("Possible Diabetes")
+    # Diabetes detection - specify type of glucose test
+    glucose = values.get("Glucose")
+    if glucose is not None:
+        if glucose > 200:
+            diseases.append("High Blood Sugar (Possible Diabetes)")
+        elif glucose > 140:
+            diseases.append("Elevated Blood Sugar")
+
+    # Additional checks
+    platelets = values.get("Platelet_Count")
+    if platelets is not None and platelets < 50000:
+        diseases.append("Thrombocytopenia (Low Platelets)")
 
     return diseases
 
