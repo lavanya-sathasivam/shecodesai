@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+easyocr
+pytesseract
+Pillow
+pandas
+sentence-transformers
+faiss-cpu
+numpy
+rapidfuzz
+torch
